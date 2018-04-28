@@ -24,20 +24,24 @@ parser.add_argument("-f", "--file", dest="inputFile",
 args = parser.parse_args()
 
 with open(args.inputFile, 'r') as f: 
-    bucketNames = [line.strip() for line in f] 
-    lineCount = len(bucketNames)
+	bucketNames = [line.strip() for line in f] 
+	lineCount = len(bucketNames)
 
 print "[*] Commencing enumeration of '%s', reading %i lines from '%s'." % (args.targetStem, lineCount, f.name)
 
 for name in bucketNames:
-	r = requests.head("http://%s%s.s3.amazonaws.com" % (args.targetStem, name))
-	if r.status_code != 404:
-                # macOS, coming soon: os.system("notify Potential match found! %s%s: %s" % (args.targetStem, name, r.status_code))
-		print "[+] Checking potential match: %s%s --> %s" % (args.targetStem, name, r.status_code)
-		check = commands.getoutput("/usr/local/bin/aws s3 ls s3://%s%s" % (args.targetStem, name))
-		print check
-	else:
-		sys.stdout.write('')
+	for c in {"-",".","_",""}:
+		for l in (True,False):
+			if(l):
+				bucketName = args.targetStem + c + name
+			else:
+				bucketName = name + c + args.targetStem
+			r = requests.head("http://%s.s3.amazonaws.com" % bucketName)
+			if r.status_code != 404:
+				print "[+] Checking potential match: %s --> %s" % (bucketName, r.status_code)
+				check = commands.getoutput("aws s3 ls s3://%s" % bucketName)
+				if "The specified bucket does not exist" not in check:
+					print check
 
 print "[*] Enumeration of '%s' buckets complete." % (args.targetStem)
 # macOS, coming soon: os.system("notify Enumeration of %s buckets complete." % (args.targetStem))
