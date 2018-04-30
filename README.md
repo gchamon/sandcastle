@@ -19,20 +19,25 @@ The script takes a target's name as the stem argument (e.g. `shopify`) and itera
 ## Getting started
 Here's how to get started:
 
-1. Clone this repo (PyPi distribution temporarily disabled).
+1. Clone this repo
 2. Run `sandcastle.py` with a target name and input file (grab an example from this repo)
 3. Matching bucket permutations will be identified, and read permissions tested.
 
 ```
-usage: sandcastle.py [-h] -t targetStem [-f inputFile]
+usage: sandcastle.py [-h] (-t targetStem | -f inputFile) [-b bucketFile]
+                     [-o outputFile]
 
 arguments:
   -h, --help            show this help message and exit
   -t targetStem, --target targetStem
                         Select a target stem name (e.g. 'shopify')
   -f inputFile, --file inputFile
+                        Select a target list file
+  -b bucketFile, --bucket-list bucketFile
                         Select a bucket permutation file (default: bucket-
                         names.txt)
+  -o outputFile, --output outputFile
+                        Select a output file
 ```
 
 ```
@@ -41,10 +46,10 @@ arguments:
  _\ \/ _ `/ _ \/ _  / __/ _ `(_-</ __/ / -_)
 /___/\_,_/_//_/\_,_/\__/\_,_/___/\__/_/\__/
 
-S3 bucket enumeration // release v1.2.4 // ysx
+S3 bucket enumeration // release v1.2.5 // ysx
 
 
-[*] Commencing enumeration of 'shopify', reading 138 lines from 'bucket-names.txt'.
+[*] Commencing enumeration of 'shopify', reading 163 lines from 'bucket-names.txt'.
 
 [+] Checking potential match: shopify-content --> 403
 
