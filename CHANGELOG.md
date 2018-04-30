@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to the Sandcastle script will be documented in this file.
 
+## 1.2.5 – 2018-04-30
+* Added more permutations
+* target stem names can now be loaded from the file
+* Implemented output file option
+
 ## 1.2.4 – 2017-05-28
 * Temporarily removed PyPi distribution channel
 * Shipping an updated bucket names wordlist
