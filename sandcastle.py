@@ -48,7 +48,7 @@ def checkBuckets(target):
 							outFile.write("[+] Command output:%s\n" % check)
 						print check
 
-def init():
+if __name__ == "__main__":	
 	with open(args.bucketFile, 'r') as b: 
 		bucketNames = [line.strip() for line in b] 
 		lineCount = len(bucketNames)
@@ -56,8 +56,6 @@ def init():
 	if args.outputFile:
 		outFile = open(args.outputFile,"w")
 
-if __name__ == "__main__":
-	init()
 	if(args.inputFile):
 		with open(args.inputFile, 'r') as f: 
 			targetNames = [line.strip() for line in f]
