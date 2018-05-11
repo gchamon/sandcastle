@@ -68,5 +68,8 @@ if __name__ == "__main__":
 		print "[*] Commencing enumeration of '%s', reading %i lines from '%s'." % (args.targetStem, lineCount, b.name)
 		checkBuckets(args.targetStem)
 		print "[*] Enumeration of '%s' buckets complete." % (args.targetStem)
-
-	outFile.close()
+	
+	try:
+		outFile.close()
+	except:
+		pass
