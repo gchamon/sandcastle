@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys, os, commands, requests
+import sys, os, commands, requests, random, string
 from argparse import ArgumentParser
 
 print """
@@ -13,6 +13,9 @@ print """
 S3 bucket enumeration // release v1.2.5 // ysx
 
 """
+#Create file for write check
+filename = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(15)) + '.txt'
+
 targetStem = ""
 inputFile = ""
 bucketFile = ""
@@ -41,14 +44,20 @@ def checkBuckets(target):
 				r = requests.head("http://%s.s3.amazonaws.com" % bucketName)
 				if r.status_code != 404:
 					print "[+] Checking potential match: %s --> %s" % (bucketName, r.status_code)
-					check = commands.getoutput("aws s3 ls s3://%s" % bucketName)
-					if "The specified bucket does not exist" not in check:
+					readCheck = commands.getoutput("aws s3 ls s3://%s" % bucketName)
+					if "The specified bucket does not exist" not in readCheck:
+						writeCheck = commands.getoutput("aws s3 mv %s s3://%s" % (filename, bucketName))
 						if args.outputFile:
 							outFile.write("[+] Found a match: %s --> %s\n" % (bucketName, r.status_code))
-							outFile.write("[+] Command output:%s\n" % check)
-						print check
+							outFile.write("[+] Read access test:%s\n" % readCheck)
+							outFile.write("[+] Write access test:%s\n" % writeCheck)
+						print "[+] Checking read access..."
+						print readCheck
+						print "[+] Checking write access..."
+						print writeCheck
 
 if __name__ == "__main__":	
+	open(filename,'a').close()
 	with open(args.bucketFile, 'r') as b: 
 		bucketNames = [line.strip() for line in b] 
 		lineCount = len(bucketNames)
@@ -68,7 +77,10 @@ if __name__ == "__main__":
 		print "[*] Commencing enumeration of '%s', reading %i lines from '%s'." % (args.targetStem, lineCount, b.name)
 		checkBuckets(args.targetStem)
 		print "[*] Enumeration of '%s' buckets complete." % (args.targetStem)
-	
+	try:
+		os.remove(filename)
+	except:
+		pass
 	try:
 		outFile.close()
 	except:
