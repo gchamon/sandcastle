@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import sys, os, commands, requests, random, string
+from threading import BoundedSemaphore, Thread
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 from argparse import ArgumentParser
 
 print """
@@ -14,7 +17,8 @@ S3 bucket enumeration // release v1.2.5 // ysx
 
 """
 #Create file for write check
-filename = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(15)) + '.txt'
+filename = 'sndt_' + ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(15)) + '.txt'
+threadCount = 20 #Default
 
 targetStem = ""
 inputFile = ""
@@ -30,31 +34,65 @@ parser.add_argument("-b", "--bucket-list", dest="bucketFile",
                     help="Select a bucket permutation file (default: bucket-names.txt)", default="bucket-names.txt", metavar="bucketFile")
 parser.add_argument("-o", "--output", dest="outputFile",
                     help="Select a output file", default="", metavar="outputFile")
+parser.add_argument("--threads", dest="threadCount",
+                    help="Choose number of threads (default=20)", default=20, metavar="threadCount")
 args = parser.parse_args()
 
+semaphore = BoundedSemaphore(threadCount)
 
-def checkBuckets(target):
+def checkBuckets(target,name):
+	semaphore.acquire()
+	for c in {"-",".","_",""}:
+		for l in (True,False):
+			if(l):
+				bucketName = target + c + name
+			else:
+				bucketName = name + c + target
+			r = requests_retry_session().head("http://%s.s3.amazonaws.com" % bucketName)
+			if r.status_code != 404:
+				readCheck = commands.getoutput("aws s3 ls s3://%s" % bucketName)
+				if "The specified bucket does not exist" not in readCheck:
+					writeCheck = commands.getoutput("aws s3 mv %s s3://%s" % (filename, bucketName))
+					formatOutput(sys.stdout,bucketName, readCheck, writeCheck)
+					if args.outputFile:
+						formatOutput(outFile,bucketName, readCheck, writeCheck)
+	semaphore.release()
+
+def formatOutput(outFile,bucketName, readCheck, writeCheck):
+	if ("An error occurred" not in readCheck) or ("An error occurred" not in writeCheck):
+		outFile.write("[!] Found a match: %s\n" % bucketName)
+	if "An error occurred" not in readCheck:
+		outFile.write("[+] Read access test (%s):%s\n" % (bucketName,readCheck))
+	if "An error occurred" not in writeCheck:
+		outFile.write("[+] Write access test (%s):%s\n" % (bucketName,writeCheck))
+
+def requests_retry_session(
+    retries=3,
+    backoff_factor=0.3,
+    status_forcelist=(500, 502, 504),
+    session=None,
+):
+    session = session or requests.Session()
+    retry = Retry(
+        total=retries,
+        read=retries,
+        connect=retries,
+        backoff_factor=backoff_factor,
+        status_forcelist=status_forcelist,
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+    return session
+
+def loadBuckets(target):
+	threads = []
 	for name in bucketNames:
-		for c in {"-",".","_",""}:
-			for l in (True,False):
-				if(l):
-					bucketName = target + c + name
-				else:
-					bucketName = name + c + target
-				r = requests.head("http://%s.s3.amazonaws.com" % bucketName)
-				if r.status_code != 404:
-					print "[+] Checking potential match: %s --> %s" % (bucketName, r.status_code)
-					readCheck = commands.getoutput("aws s3 ls s3://%s" % bucketName)
-					if "The specified bucket does not exist" not in readCheck:
-						writeCheck = commands.getoutput("aws s3 mv %s s3://%s" % (filename, bucketName))
-						if args.outputFile:
-							outFile.write("[+] Found a match: %s --> %s\n" % (bucketName, r.status_code))
-							outFile.write("[+] Read access test:%s\n" % readCheck)
-							outFile.write("[+] Write access test:%s\n" % writeCheck)
-						print "[+] Checking read access..."
-						print readCheck
-						print "[+] Checking write access..."
-						print writeCheck
+		threads.append(Thread(target=checkBuckets, args=(name,target)))
+	for thread in threads:  # Starts all the threads.
+		thread.start()
+	for thread in threads:  # Waits for threads to complete before moving on with the main script.
+		thread.join()
 
 if __name__ == "__main__":	
 	open(filename,'a').close()
@@ -71,11 +109,11 @@ if __name__ == "__main__":
 			f.close()
 		for target in targetNames:
 			print "[*] Commencing enumeration of '%s', reading %i lines from '%s'." % (target, lineCount, b.name)
-			checkBuckets(target)
+			loadBuckets(target)
 			print "[*] Enumeration of '%s' buckets complete." % (target)
 	else:
 		print "[*] Commencing enumeration of '%s', reading %i lines from '%s'." % (args.targetStem, lineCount, b.name)
-		checkBuckets(args.targetStem)
+		loadBuckets(args.targetStem)
 		print "[*] Enumeration of '%s' buckets complete." % (args.targetStem)
 	try:
 		os.remove(filename)
