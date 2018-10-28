@@ -20,8 +20,8 @@ The script takes a target's name as the stem argument (e.g. `shopify`) and itera
 Here's how to get started:
 
 1. Clone this repo
-2. Run `sandcastle.py` with a target name and input file (grab an example from this repo)
-3. Matching bucket permutations will be identified, and read permissions tested.
+2. Run `sandcastle.py` with a target name or list of targets
+3. Matching bucket permutations will be identified, and read/write permissions tested.
 
 ```
 usage: sandcastle.py [-h] (-t targetStem | -f inputFile) [-b bucketFile]
@@ -38,6 +38,8 @@ arguments:
                         names.txt)
   -o outputFile, --output outputFile
                         Select a output file
+  --threads threadCount
+                        Choose number of threads (default=20)
 ```
 
 ```
