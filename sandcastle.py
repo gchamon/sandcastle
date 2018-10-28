@@ -95,7 +95,7 @@ def loadBuckets(target):
 		thread.join()
 
 if __name__ == "__main__":	
-	open(filename,'a').close()
+	open(filename,'a').close() #Create random file for write test
 	with open(args.bucketFile, 'r') as b: 
 		bucketNames = [line.strip() for line in b] 
 		lineCount = len(bucketNames)
