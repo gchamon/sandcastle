@@ -9,10 +9,10 @@ The script takes a target's name as the stem argument (e.g. `shopify`) and itera
 ```
 -training
 -bucket
--dev
--attachments
--photos
--elasticsearch
+_dev
+_attachments
+.photos
+.elasticsearch
 [...]
 ```
 
@@ -25,21 +25,21 @@ Here's how to get started:
 
 ```
 usage: sandcastle.py [-h] (-t targetStem | -f inputFile) [-b bucketFile]
-                     [-o outputFile]
+                     [-o outputFile] [--threads threadCount]
 
 arguments:
   -h, --help            show this help message and exit
-  -t targetStem, --target targetStem
+  -t shopify, --target shopify
                         Select a target stem name (e.g. 'shopify')
-  -f inputFile, --file inputFile
+  -f targets.txt, --file targets.txt
                         Select a target list file
-  -b bucketFile, --bucket-list bucketFile
+  -b bucket-names.txt, --bucket-list bucket-names.txt
                         Select a bucket permutation file (default: bucket-
                         names.txt)
-  -o outputFile, --output outputFile
+  -o output.txt, --output output.txt
                         Select a output file
-  --threads threadCount
-                        Choose number of threads (default=20)
+  --threads 50
+                        Choose number of threads (default=50)
 ```
 
 ```
@@ -48,10 +48,10 @@ arguments:
  _\ \/ _ `/ _ \/ _  / __/ _ `(_-</ __/ / -_)
 /___/\_,_/_//_/\_,_/\__/\_,_/___/\__/_/\__/
 
-S3 bucket enumeration // release v1.2.5 // ysx
+S3 bucket enumeration // release v1.3 // ysx & Parasimpaticki
 
 
-[*] Commencing enumeration of 'shopify', reading 163 lines from 'bucket-names.txt'.
+[*] Commencing enumeration of 'spotify', reading 2125 lines from 'bucket-names.txt'.
 
 [+] Checking potential match: shopify-content --> 403
 
