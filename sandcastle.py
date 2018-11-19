@@ -13,7 +13,7 @@ print """
  _\ \/ _ `/ _ \/ _  / __/ _ `(_-</ __/ / -_)
 /___/\_,_/_//_/\_,_/\__/\_,_/___/\__/_/\__/ 
                                             
-S3 bucket enumeration // release v1.2.5 // ysx
+S3 bucket enumeration // release v1.3 // ysx & Parasimpaticki
 
 """
 #Create file for write check
@@ -27,21 +27,20 @@ bucketFile = ""
 parser = ArgumentParser()
 group = parser.add_mutually_exclusive_group(required=True)
 group.add_argument("-t", "--target", dest="targetStem",
-                    help="Select a target stem name (e.g. 'shopify')", metavar="targetStem")
+                    help="Select a target stem name (e.g. 'shopify')", metavar="shopify")
 group.add_argument("-f", "--file", dest="inputFile",
-                    help="Select a target list file", metavar="inputFile")
+                    help="Select a target list file", metavar="targets.txt")
 parser.add_argument("-b", "--bucket-list", dest="bucketFile",
-                    help="Select a bucket permutation file (default: bucket-names.txt)", default="bucket-names.txt", metavar="bucketFile")
+                    help="Select a bucket permutation file (default: bucket-names.txt)", default="bucket-names.txt", metavar="bucket-names.txt")
 parser.add_argument("-o", "--output", dest="outputFile",
-                    help="Select a output file", default="", metavar="outputFile")
+                    help="Select a output file", default="", metavar="output.txt")
 parser.add_argument("--threads", dest="threadCount",
-                    help="Choose number of threads (default=20)", default=20, metavar="threadCount")
+                    help="Choose number of threads (default=50)", default=50, metavar="50")
 args = parser.parse_args()
 
 semaphore = BoundedSemaphore(threadCount)
 
 def checkBuckets(target,name):
-	semaphore.acquire()
 	for c in {"-",".","_",""}:
 		for l in (True,False):
 			if(l):
@@ -90,6 +89,7 @@ def loadBuckets(target):
 	for name in bucketNames:
 		threads.append(Thread(target=checkBuckets, args=(name,target)))
 	for thread in threads:  # Starts all the threads.
+		semaphore.acquire()
 		thread.start()
 	for thread in threads:  # Waits for threads to complete before moving on with the main script.
 		thread.join()
