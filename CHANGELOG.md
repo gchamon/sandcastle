@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to the Sandcastle script will be documented in this file.
 
+## 1.3 - 2018-11-19
+* Bug fixes
+* Implemented multi-threading
+* Added more bucket names
+
 ## 1.2.5 – 2018-04-30
 * Added more permutations
 * target stem names can now be loaded from the file
