@@ -47,11 +47,14 @@ def checkBuckets(target,name):
 				bucketName = target + c + name
 			else:
 				bucketName = name + c + target
-			r = requests_retry_session().head("http://%s.s3.amazonaws.com" % bucketName)
+			try:
+				r = requests_retry_session().head("http://%s.s3.amazonaws.com" % bucketName)
+			except:
+				continue
 			if r.status_code != 404:
 				readCheck = commands.getoutput("aws s3 ls s3://%s" % bucketName)
 				if "The specified bucket does not exist" not in readCheck:
-					writeCheck = commands.getoutput("aws s3 mv %s s3://%s" % (filename, bucketName))
+					writeCheck = commands.getoutput("aws s3 cp %s s3://%s" % (filename, bucketName))
 					formatOutput(sys.stdout,bucketName, readCheck, writeCheck)
 					if args.outputFile:
 						formatOutput(outFile,bucketName, readCheck, writeCheck)
@@ -115,6 +118,8 @@ if __name__ == "__main__":
 		print "[*] Commencing enumeration of '%s', reading %i lines from '%s'." % (args.targetStem, lineCount, b.name)
 		loadBuckets(args.targetStem)
 		print "[*] Enumeration of '%s' buckets complete." % (args.targetStem)
+
+	print "[*] Cleaning up..."
 	try:
 		os.remove(filename)
 	except:
