@@ -16,6 +16,15 @@ _attachments
 [...]
 ```
 
+# About this fork
+
+It uses the threading implementation of `Parasimpaticki/sandcastle`. I include a Dockerfile for extra security when running the script:
+
+```sh
+docker build -t sandcastle .
+docker run -it --rm sandcastle -t shopify
+```
+
 ## Getting started
 Here's how to get started:
 
