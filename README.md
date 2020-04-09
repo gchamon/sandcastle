@@ -21,8 +21,13 @@ _attachments
 It uses the threading implementation of `Parasimpaticki/sandcastle`. I include a Dockerfile for extra security when running the script:
 
 ```sh
-docker build -t sandcastle .
-docker run -it --rm sandcastle -t shopify
+docker run -it --rm gchamon/sandcastle -t shopify
+```
+
+Compiling yourself:
+```sh
+docker build -t my-sandcastle-image .
+docker run -it --rm my-sandcastle-image -t shopify
 ```
 
 ## Getting started
